@@ -1,5 +1,4 @@
 var boxes = [
-    {},//todo, if we don't put dummy entry, the next one is not taken into account
     {
         "name": "B1",
         "color": "#0000FF",

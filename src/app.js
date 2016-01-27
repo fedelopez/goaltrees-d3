@@ -71,6 +71,9 @@ var runApp = function () {
         .style("stroke-width", 1)
         .style("fill", function (box) {
             return box.color;
+        })
+        .on("click", function (box) {
+            console.log("Box " + box.name + " clicked.");
         });
 };
 

@@ -51,11 +51,13 @@ var runApp = function () {
         .style("fill", "black");
 
     //BOXES
-    container.selectAll("#box")
+    container.selectAll("[id^=box]")
         .data(boxes)
         .enter()
         .append("rect")
-        .attr("id", "box")
+        .attr("id", function (box) {
+            return "box-" + box.name;
+        })
         .attr("x", function (box) {
             return box.x * boxW;
         })
@@ -74,20 +76,42 @@ var runApp = function () {
         })
         .on("click", function (box) {
             console.log("Box " + box.name + " clicked.");
+            dropCrane(box);
         });
 };
 
-var dropCrane = function () {
+var dropCrane = function (targetBox) {
+    var boxElement = document.getElementById("box-" + targetBox.name);
     d3.selectAll("#crane")
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("height", terrainH - baseLineH - (2 * boxH) - magnetHookH);
+        .attr("x", Number(boxElement.getAttribute("x")) + boxW / 2 - craneW / 2)
+        .each("end", function () {
+            console.log("Crane engaged");
+        })
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("height", terrainH - baseLineH - (boxH * targetBox.height) - (boxH * targetBox.y) - magnetHookH)
+        .each("end", function () {
+            console.log("Crane dropped");
+        });
     d3.selectAll("#magnet")
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("y", terrainH - baseLineH - 2 * boxH - magnetHookH);
+        .attr("x", Number(boxElement.getAttribute("x")) + boxW / 2 - magnetHookW / 2)
+        .each("end", function () {
+            console.log("Magnet engaged");
+        })
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("y", terrainH - baseLineH - (boxH * targetBox.height) - (boxH * targetBox.y) - magnetHookH)
+        .each("end", function () {
+            console.log("Magnet attached");
+        });
 };
 
 

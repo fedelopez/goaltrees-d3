@@ -15,6 +15,8 @@ var terrainW = baseLineW;
 var terrainH = maxBoxH * 3;
 
 var runApp = function () {
+    d3.select("#app").selectAll("*").remove();
+
     var container = d3.select("#app")
         .append("svg")
         .attr("width", terrainW)
@@ -68,6 +70,7 @@ var runApp = function () {
         .attr("height", function (box) {
             return box.height * boxH;
         })
+        .style("cursor", "pointer")
         .style("stroke", "lightgrey")
         .style("fill", "none")
         .style("stroke-width", 1)

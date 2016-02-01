@@ -2,7 +2,7 @@ var boxW = 50;
 var boxH = 50;
 var maxBoxH = boxH * 2;
 
-var baseLineW = boxW * 7;
+var baseLineW = boxW * 10;
 var baseLineH = 10;
 
 var craneW = 10;
@@ -66,7 +66,9 @@ var runApp = function () {
         .attr("y", function (box) {
             return terrainH - baseLineH - (boxH * box.height) - (boxH * box.height * box.y);
         })
-        .attr("width", boxW)
+        .attr("width", function (box) {
+            return box.width * boxW;
+        })
         .attr("height", function (box) {
             return box.height * boxH;
         })
@@ -89,7 +91,7 @@ var dropCrane = function (targetBox) {
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("x", Number(boxElement.getAttribute("x")) + boxW / 2 - craneW / 2)
+        .attr("x", Number(boxElement.getAttribute("x")) + (boxW * targetBox.width) / 2 - craneW / 2)
         .each("end", function () {
             console.log("Crane engaged");
         })
@@ -104,7 +106,7 @@ var dropCrane = function (targetBox) {
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("x", Number(boxElement.getAttribute("x")) + boxW / 2 - magnetHookW / 2)
+        .attr("x", Number(boxElement.getAttribute("x")) + (boxW * targetBox.width) / 2 - magnetHookW / 2)
         .each("end", function () {
             console.log("Magnet engaged");
         })

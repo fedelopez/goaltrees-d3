@@ -1,66 +1,30 @@
-var boxes = [
-    {
-        "name": "B1",
-        "color": "#0000FF",
-        "x": 1,
-        "y": 1,
-        "height": 1,
-        "width": 1
-    },
-    {
-        "name": "G1",
-        "color": "#008000",
-        "x": 1,
-        "y": 0,
-        "height": 1,
-        "width": 1
-    },
-    {
-        "name": "R1",
-        "color": "#FF0000",
-        "x": 2,
-        "y": 0,
-        "height": 2,
-        "width": 1
-    },
-    {
-        "name": "O1",
-        "color": "orange",
-        "x": 3,
-        "y": 0,
-        "height": 1,
-        "width": 1
-    },
-    {
-        "name": "B2",
-        "color": "#0000FF",
-        "x": 4,
-        "y": 0,
-        "height": 2,
-        "width": 2
-    },
-    {
-        "name": "G2",
-        "color": "#008000",
-        "x": 6,
-        "y": 0,
-        "height": 1,
-        "width": 2
-    },
-    {
-        "name": "R2",
-        "color": "#FF0000",
-        "x": 8,
-        "y": 0,
-        "height": 1,
-        "width": 1
-    },
-    {
-        "name": "O2",
-        "color": "orange",
-        "x": 9,
-        "y": 0,
-        "height": 2,
-        "width": 1
+var Box = function (name, color, x, y, height, width) {
+    this.name = name;
+    this.color = color;
+    this.x = x;
+    this.y = y;
+    this.height = height;
+    this.width = width;
+
+    var self = this;
+
+    function onTopOf(candidateBox) {
+        return self.y < candidateBox.y && self.x === candidateBox.x
     }
+
+    this.hasBoxAbove = function (allBoxes) {
+        return allBoxes.some(onTopOf)
+    };
+
+};
+
+var boxes = [
+    new Box("B1", "#0000FF", 1, 1, 1, 1),
+    new Box("G1", "#008000", 1, 0, 1, 1),
+    new Box("R1", "#FF0000", 2, 0, 2, 1),
+    new Box("O1", "orange", 3, 0, 1, 1),
+    new Box("B2", "#0000FF", 4, 0, 2, 2),
+    new Box("G2", "#008000", 6, 0, 1, 2),
+    new Box("R2", "#FF0000", 8, 0, 1, 1),
+    new Box("O2", "orange", 9, 0, 2, 1)
 ];

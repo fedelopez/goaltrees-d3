@@ -119,20 +119,11 @@ var dropCrane = function (targetBox) {
         });
 };
 
-var move = function (allBoxes, srcBox, destinationBox) {
-    if (!hasBoxAbove(allBoxes, srcBox) && !hasBoxAbove(allBoxes, destinationBox)) {
-        return [];
+var moveBox = function (allBoxes, srcBox, destBox) {
+    if (!srcBox.hasBoxAbove(allBoxes) && !destBox.hasBoxAbove(allBoxes)) {
+        return [{box: srcBox, x: destBox.x, y: 1 + destBox.y + destBox.height}];
     } else {
         return null;
     }
 };
 
-function onTopOf(box) {
-    return function (candidateBox) {
-        return box.y < candidateBox.y && box.x === candidateBox.x
-    };
-}
-
-var hasBoxAbove = function (allBoxes, box) {
-    return allBoxes.some(onTopOf(box))
-};

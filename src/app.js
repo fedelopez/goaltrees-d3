@@ -16,6 +16,9 @@ const terrainW = baseLineW;
 const terrainH = maxBoxH * 3;
 
 
+/**
+ * todo remove srcBox, dstX and dstY as they are not really part of the state
+ */
 var State = function (boxPile, srcBox, dstX, dstY) {
 
     this.isGoal = function () {
@@ -38,6 +41,10 @@ var State = function (boxPile, srcBox, dstX, dstY) {
         return dstY;
     };
 
+    /**
+     * todo pass the scr box and the destination point as parameters of this function as the state will not hold anymore
+     * this information (it will just hold a pile of boxes)
+     */
     this.getNeighbors = function () {
         var neighbors = [];
         if (boxPile.isBoxAbove(srcBox)) {
@@ -140,7 +147,6 @@ var BoxPile = function (allBoxes, width, height) {
     this.getHeight = function () {
         return height;
     };
-
 
     this.boxAt = function (x, y) {
         var boxes = allBoxes.filter(function (box) {
@@ -267,6 +273,9 @@ function dropCrane(targetBox) {
         });
 }
 
+/**
+ * todo, in addition to initialState: State, pass 2 more arguments: source box: Box, destination: Point
+ */
 function moveBox(initialState) {
 
     var doMoveBox = function (visited, frontier) {

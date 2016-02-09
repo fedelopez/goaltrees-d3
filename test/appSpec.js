@@ -17,7 +17,6 @@ describe("goaltrees-d3", function () {
             boxPile = new BoxPile(allBoxes, 10, 3);
         });
 
-
         it("should return one operation when both boxes have no other box on top", function () {
             var boxR1 = allBoxes[2];
             var boxR2 = allBoxes[6];
@@ -52,7 +51,7 @@ describe("goaltrees-d3", function () {
 
     describe("state suite", function () {
 
-        it("should propose the first empty spot to get rid of the box on top", function () {
+        it("should return the first empty spot to get rid of the box on top", function () {
             var allBoxes = [
                 new Box("B1", "blue", 0, 1, 1, 1),
                 new Box("G1", "green", 0, 0, 1, 1),

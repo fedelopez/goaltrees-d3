@@ -104,7 +104,23 @@ describe("goaltrees-d3", function () {
             expect(neighbors[1].getDstY()).toBe(1);
         });
 
-        //todo: test when y is reaching the pile max height
+        it("should propose the next abscissa when the first option is already full of boxes", function () {
+            var b1 = new Box("B1", "blue", 0, 0, 1, 1);
+            var b2 = new Box("B2", "blue", 0, 1, 1, 1);
+            var b3 = new Box("B3", "blue", 1, 0, 2, 1);
+            var b4 = new Box("B4", "blue", 1, 1, 1, 1);
+            var b5 = new Box("B5", "blue", 2, 0, 1, 1);
+            var b6 = new Box("B6", "blue", 2, 1, 1, 1);
+            var b7 = new Box("B7", "blue", 3, 0, 1, 1);
+            var allBoxes = [b1, b2, b3, b4, b5, b6, b7];
+
+            var neighbors = new State(new BoxPile(allBoxes, 4, 2), b6, 0, 1).getNeighbors();
+            expect(neighbors.length).toBe(1);
+
+            expect(neighbors[0].getBoxName()).toBe("B2");
+            expect(neighbors[0].getDstX()).toBe(3);
+            expect(neighbors[0].getDstY()).toBe(1);
+        })
     });
 
     describe("box pile suite", function () {

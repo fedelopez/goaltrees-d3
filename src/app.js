@@ -119,14 +119,13 @@ var BoxPile = function (allBoxes, width, height) {
             return b.x;
         });
         abscissas.sort();
-        var index = undefined;
         for (var x = 0; x < this.getWidth(); x++) {
             if (abscissas.indexOf(x) < 0) {
                 return {"x": x, "y": 0};
             }
         }
         const result = allBoxes.filter(function (currentBox) {
-            return (!self.isBoxAbove(currentBox) && currentBox.x != box.x && currentBox.x != excludedAbscissa);
+            return (!self.isBoxAbove(currentBox) && currentBox.x != box.x && currentBox.x != excludedAbscissa && currentBox.y < self.getHeight() - 1);
         });
         if (result.length > 0) {
             return {"x": result[0].x, "y": result[0].y + 1};
@@ -137,6 +136,11 @@ var BoxPile = function (allBoxes, width, height) {
     this.getWidth = function () {
         return width;
     };
+
+    this.getHeight = function () {
+        return height;
+    };
+
 
     this.boxAt = function (x, y) {
         var boxes = allBoxes.filter(function (box) {

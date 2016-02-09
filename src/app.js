@@ -45,6 +45,15 @@ var State = function (boxPile, srcBox, dstX, dstY) {
             const point = boxPile.firstFreeCoordinate(topMostBox, dstX);
             neighbors.push(new Action(topMostBox.name, point.x, point.y));
         }
+        var dstBox = boxPile.boxAt(dstX, dstY);
+        if (dstBox) {
+            const topMostBox = boxPile.topmostBoxAbove(dstBox);
+            if (topMostBox) {
+                dstBox = topMostBox;
+            }
+            const point = boxPile.firstFreeCoordinate(dstBox, dstX);
+            neighbors.push(new Action(dstBox.name, point.x, point.y));
+        }
         return neighbors;
     };
 };
@@ -106,24 +115,35 @@ var BoxPile = function (allBoxes, width, height) {
     };
 
     this.firstFreeCoordinate = function (box, excludedAbscissa) {
+        var abscissas = allBoxes.map(function (b) {
+            return b.x;
+        });
+        abscissas.sort();
+        var index = undefined;
         for (var x = 0; x < this.getWidth(); x++) {
-            const emptySpot = allBoxes.every(function (currentBox) {
-                return currentBox.x != x;
-            });
-            if (emptySpot) {
+            if (abscissas.indexOf(x) < 0) {
                 return {"x": x, "y": 0};
-            } else {
-                const result = allBoxes.filter(function (currentBox) {
-                    return (!self.isBoxAbove(currentBox) && currentBox.x != box.x && currentBox.x != excludedAbscissa);
-                });
-                if (result.length > 0) return {"x": result[0].x, "y": result[0].y + 1}
             }
+        }
+        const result = allBoxes.filter(function (currentBox) {
+            return (!self.isBoxAbove(currentBox) && currentBox.x != box.x && currentBox.x != excludedAbscissa);
+        });
+        if (result.length > 0) {
+            return {"x": result[0].x, "y": result[0].y + 1};
         }
         return undefined;
     };
 
     this.getWidth = function () {
         return width;
+    };
+
+    this.boxAt = function (x, y) {
+        var boxes = allBoxes.filter(function (box) {
+            return (box.x === x && box.y === y);
+        });
+        if (boxes.length > 0) return boxes[0];
+        else return undefined;
     }
 };
 

@@ -16,7 +16,7 @@ const terrainW = baseLineW;
 const terrainH = maxBoxH * 3;
 
 var State = function (boxPile) {
-    this.action = null;
+    this.step = null;
 
     var createNeighbor = function (pile, box, dstX) {
         const point = pile.firstFreeCoordinate(box, dstX);
@@ -25,7 +25,7 @@ var State = function (boxPile) {
         boxAt.x = point.x;
         boxAt.y = point.y;
         var state = new State(pileCopy);
-        state.action = new Action(box, point.x, point.y);
+        state.step = new Step(box, point.x, point.y);
         return state;
     };
 
@@ -43,7 +43,7 @@ var State = function (boxPile) {
         }
         if (!topMostBoxSrc && !topMostBoxDst) {
             var state = new State(boxPile);
-            state.action = new Action(srcBox, dstX, dstY);
+            state.step = new Step(srcBox, dstX, dstY);
             neighbors.push(state)
         }
 
@@ -54,12 +54,12 @@ var State = function (boxPile) {
         return boxPile;
     };
 
-    this.getAction = function () {
-        return this.action;
+    this.getStep = function () {
+        return this.step;
     }
 };
 
-var Action = function (box, dstX, dstY) {
+var Step = function (box, dstX, dstY) {
 
     this.getBox = function () {
         return box;
@@ -284,7 +284,7 @@ function moveBox(initialState, srcBox, dstX, dstY) {
         }
         frontier = frontier.concat(neighbors);
         actions = actions.concat(neighbors.map(function (neighbor) {
-            return neighbor.getAction();
+            return neighbor.getStep();
         }));
         var last = actions[actions.length - 1];
         if (last.getBox().name === srcBox.name && last.getDstX() === dstX && last.getDstY() === dstY) {

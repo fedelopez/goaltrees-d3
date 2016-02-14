@@ -150,18 +150,18 @@ describe("goaltrees-d3", function () {
                 b2 = new Box("B2", "blue", 4, 0, 1, 1);
             var pile = new BoxPile([b1, g1, r1, o1, b2], 4, 2);
 
-            var actions = moveBox(new State(pile), g1, 1, 0);
-            expect(actions.length).toBe(2);
+            var steps = moveBox(new State(pile), g1, 1, 0);
+            expect(steps.length).toBe(2);
 
-            var action1 = actions[0];
-            expect(action1.getBox().name).toBe(b1.name);
-            expect(action1.getDstX()).toBe(2);
-            expect(action1.getDstY()).toBe(1);
+            var step1 = steps[0];
+            expect(step1.getBox().name).toBe(b1.name);
+            expect(step1.getDstX()).toBe(2);
+            expect(step1.getDstY()).toBe(1);
 
-            var action2 = actions[1];
-            expect(action2.getBox().name).toBe(g1.name);
-            expect(action2.getDstX()).toBe(1);
-            expect(action2.getDstY()).toBe(0);
+            var step2 = steps[1];
+            expect(step2.getBox().name).toBe(g1.name);
+            expect(step2.getDstX()).toBe(1);
+            expect(step2.getDstY()).toBe(0);
         });
 
     });

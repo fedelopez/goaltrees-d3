@@ -1,124 +1,106 @@
 describe("goaltrees-d3", function () {
 
-    describe("move suite", function () {
-        var allBoxes, boxPile;
-
-        beforeEach(function () {
-            allBoxes = [
-                new Box("B1", "blue", 1, 1, 1, 1),
-                new Box("G1", "green", 1, 0, 1, 1),
-                new Box("R1", "red", 2, 0, 2, 1),
-                new Box("O1", "orange", 3, 0, 1, 1),
-                new Box("B2", "blue", 4, 0, 2, 2),
-                new Box("G2", "green", 6, 0, 1, 2),
-                new Box("R2", "red", 8, 0, 1, 1),
-                new Box("O2", "orange", 9, 0, 2, 1)
-            ];
-            boxPile = new BoxPile(allBoxes, 10, 3);
-        });
-
-        it("should return one operation when both boxes have no other box on top", function () {
-            var boxR1 = allBoxes[2];
-            var boxR2 = allBoxes[6];
-            var state = new State(allBoxes, boxR2, boxR1);
-            var moves = moveBox(state);
-            expect(moves.length).toBe(1);
-            expect(moves[0].getBoxName()).toBe(boxR2.name);
-            expect(moves[0].getDstX()).toBe(2);
-            expect(moves[0].getDstY()).toBe(3);
-        });
-
-        /**
-         * todo
-         */
-        it("should clear the top of the destination box", function () {
-            var boxG1 = allBoxes[1];
-            var boxO1 = allBoxes[3];
-            var moves = moveBox(new State(allBoxes, boxO1, boxG1));
-            expect(moves.length).toBe(2);
-
-            expect(moves[0].getBoxName()).toBe(allBoxes[0].name);
-            expect(moves[0].getDstX()).toBe(0);
-            expect(moves[0].getDstY()).toBe(0);
-
-            expect(moves[1].getBoxName()).toBe(boxO1.name);
-            expect(moves[1].getDstX()).toBe(1);
-            expect(moves[1].getDstY()).toBe(1);
-
-        });
-
-    });
-
-    describe("state suite", function () {
+    describe("state: neighbors", function () {
 
         it("should return the first empty spot to get rid of the box on top", function () {
-            var allBoxes = [
-                new Box("B1", "blue", 0, 1, 1, 1),
-                new Box("G1", "green", 0, 0, 1, 1),
-                new Box("R1", "red", 2, 0, 2, 1),
-                new Box("O1", "orange", 3, 0, 1, 1),
-                new Box("B2", "blue", 4, 0, 2, 2)
-            ];
-            var neighbors = new State(new BoxPile(allBoxes, 5, 3), allBoxes[1], 2, 1).getNeighbors();
-            expect(neighbors.length).toBe(1);
+            var b1 = new Box("B1", "blue", 0, 1, 1, 1),
+                g1 = new Box("G1", "green", 0, 0, 1, 1),
+                r1 = new Box("R1", "red", 2, 0, 1, 1),
+                o1 = new Box("O1", "orange", 3, 0, 1, 1),
+                b2 = new Box("B2", "blue", 4, 0, 1, 1);
+            var boxes = [b1, g1, r1, o1, b2];
 
-            expect(neighbors[0].getBoxName()).toBe("B1");
-            expect(neighbors[0].getDstX()).toBe(1);
-            expect(neighbors[0].getDstY()).toBe(0);
+            var actual = new State(new BoxPile(boxes, 5, 2)).getNeighbors(g1, 2, 1);
+            expect(actual.length).toBe(1);
+            expect(actual[0].getBoxPile().boxAt(0, 1)).toBeUndefined();
+            expect(actual[0].getBoxPile().boxAt(1, 0).name).toBe(b1.name);
         });
 
         it("should propose getting rid of the box of the top to get it out of the way", function () {
-            var b1 = new Box("B1", "blue", 0, 0, 1, 1);
-            var g1 = new Box("G1", "green", 1, 0, 1, 1);
-            var r1 = new Box("R1", "red", 1, 1, 2, 1);
-            var o1 = new Box("O1", "orange", 2, 0, 1, 1);
-            var b2 = new Box("B2", "blue", 2, 1, 1, 1);
-            var allBoxes = [b1, g1, r1, o1, b2];
+            var b1 = new Box("B1", "blue", 0, 1, 1, 1),
+                g1 = new Box("G1", "green", 0, 0, 1, 1),
+                r1 = new Box("R1", "red", 1, 0, 1, 1),
+                o1 = new Box("O1", "orange", 2, 0, 1, 1),
+                b2 = new Box("B2", "blue", 3, 1, 1, 1);
+            var boxes = [b1, g1, r1, o1, b2];
 
-            var neighbors = new State(new BoxPile(allBoxes, 3, 2), g1, 2, 2).getNeighbors();
-            expect(neighbors.length).toBe(1);
-
-            expect(neighbors[0].getBoxName()).toBe("R1");
-            expect(neighbors[0].getDstX()).toBe(0);
-            expect(neighbors[0].getDstY()).toBe(1);
+            var actual = new State(new BoxPile(boxes, 4, 2)).getNeighbors(g1, 2, 1);
+            expect(actual.length).toBe(1);
+            expect(actual[0].getBoxPile().boxAt(0, 1)).toBeUndefined();
+            expect(actual[0].getBoxPile().boxAt(1, 1).name).toBe(b1.name);
         });
 
         it("should propose getting rid of the boxes of the top to get it out of the way", function () {
-            var b1 = new Box("B1", "blue", 0, 0, 1, 1);
-            var g1 = new Box("G1", "green", 1, 0, 1, 1);
-            var r1 = new Box("R1", "red", 1, 1, 2, 1);
-            var o1 = new Box("O1", "orange", 2, 0, 1, 1);
-            var b2 = new Box("B2", "blue", 2, 1, 1, 1);
-            var allBoxes = [b1, g1, r1, o1, b2];
+            var b1 = new Box("B1", "blue", 0, 0, 1, 1),
+                g1 = new Box("G1", "green", 1, 0, 1, 1),
+                r1 = new Box("R1", "red", 1, 1, 1, 1),
+                o1 = new Box("O1", "orange", 2, 0, 1, 1),
+                b2 = new Box("B2", "blue", 2, 1, 1, 1);
+            var boxes = [b1, g1, r1, o1, b2];
 
-            var neighbors = new State(new BoxPile(allBoxes, 3, 2), g1, 2, 1).getNeighbors();
-            expect(neighbors.length).toBe(2);
+            var actual = new State(new BoxPile(boxes, 3, 3)).getNeighbors(g1, 2, 1);
+            expect(actual.length).toBe(2);
 
-            expect(neighbors[0].getBoxName()).toBe("R1");
-            expect(neighbors[0].getDstX()).toBe(0);
-            expect(neighbors[0].getDstY()).toBe(1);
+            expect(actual[0].getBoxPile().boxAt(1, 1)).toBeUndefined();
+            expect(actual[0].getBoxPile().boxAt(0, 1).name).toBe(r1.name);
 
-            expect(neighbors[1].getBoxName()).toBe("B2");
-            expect(neighbors[1].getDstX()).toBe(0);
-            expect(neighbors[1].getDstY()).toBe(1);
+            expect(actual[1].getBoxPile().boxAt(2, 1)).toBeUndefined();
+            expect(actual[1].getBoxPile().boxAt(0, 2).name).toBe(b2.name);
+        });
+
+        it("should know how to get rid of large boxes", function () {
+            var b1 = new Box("B1", "blue", 0, 0, 1, 1),
+                g1 = new Box("G1", "green", 1, 0, 1, 1),
+                r1 = new Box("R1", "red", 1, 1, 1, 1),
+                o1 = new Box("O1", "orange", 2, 0, 1, 1),
+                b2 = new Box("B2", "blue", 2, 1, 1, 1);
+            var boxes = [b1, g1, r1, o1, b2];
+
+            var actual = new State(new BoxPile(boxes, 3, 3)).getNeighbors(g1, 2, 1);
+            expect(actual.length).toBe(2);
+
+            expect(actual[0].getBoxPile().boxAt(1, 1)).toBeUndefined();
+            expect(actual[0].getBoxPile().boxAt(0, 1).name).toBe(r1.name);
+
+            expect(actual[1].getBoxPile().boxAt(2, 1)).toBeUndefined();
+            expect(actual[1].getBoxPile().boxAt(0, 2).name).toBe(b2.name);
         });
 
         it("should propose the next abscissa when the first option is already full of boxes", function () {
-            var b1 = new Box("B1", "blue", 0, 0, 1, 1);
-            var b2 = new Box("B2", "blue", 0, 1, 1, 1);
-            var b3 = new Box("B3", "blue", 1, 0, 2, 1);
-            var b4 = new Box("B4", "blue", 1, 1, 1, 1);
-            var b5 = new Box("B5", "blue", 2, 0, 1, 1);
-            var b6 = new Box("B6", "blue", 2, 1, 1, 1);
-            var b7 = new Box("B7", "blue", 3, 0, 1, 1);
-            var allBoxes = [b1, b2, b3, b4, b5, b6, b7];
+            var b1 = new Box("B1", "blue", 0, 0, 1, 1),
+                b2 = new Box("B2", "blue", 0, 1, 1, 1),
+                g1 = new Box("G1", "green", 1, 0, 1, 1),
+                r1 = new Box("R1", "red", 1, 1, 1, 1),
+                o1 = new Box("O1", "orange", 2, 0, 1, 1),
+                w1 = new Box("W1", "white", 3, 0, 1, 1);
+            var boxes = [b1, g1, r1, o1, b2, w1];
 
-            var neighbors = new State(new BoxPile(allBoxes, 4, 2), b6, 0, 1).getNeighbors();
-            expect(neighbors.length).toBe(1);
+            var actual = new State(new BoxPile(boxes, 4, 2)).getNeighbors(b1, 2, 1);
+            expect(actual.length).toBe(1);
 
-            expect(neighbors[0].getBoxName()).toBe("B2");
-            expect(neighbors[0].getDstX()).toBe(3);
-            expect(neighbors[0].getDstY()).toBe(1);
+            expect(actual[0].getBoxPile().boxAt(0, 1)).toBeUndefined();
+            expect(actual[0].getBoxPile().boxAt(3, 1).name).toBe(b2.name);
+        });
+
+        it("should propose the next abscissa when the first options are already full of boxes", function () {
+            var b1 = new Box("B1", "blue", 0, 0, 1, 1),
+                b2 = new Box("B2", "blue", 0, 1, 1, 1),
+                g1 = new Box("G1", "green", 1, 0, 1, 1),
+                g2 = new Box("G2", "green", 1, 1, 1, 1),
+                o1 = new Box("O1", "orange", 2, 0, 1, 1),
+                o2 = new Box("O2", "orange", 2, 1, 1, 1),
+                w1 = new Box("W1", "white", 3, 0, 1, 1),
+                p1 = new Box("P1", "purple", 4, 0, 1, 1);
+            var boxes = [b1, g1, g2, o1, o2, b2, w1, p1];
+
+            var actual = new State(new BoxPile(boxes, 5, 2)).getNeighbors(b1, 2, 1);
+            expect(actual.length).toBe(2);
+
+            expect(actual[0].getBoxPile().boxAt(0, 1)).toBeUndefined();
+            expect(actual[0].getBoxPile().boxAt(3, 1).name).toBe(b2.name);
+
+            expect(actual[1].getBoxPile().boxAt(2, 1)).toBeUndefined();
+            expect(actual[1].getBoxPile().boxAt(4, 1).name).toBe(o2.name);
         })
     });
 
@@ -158,4 +140,29 @@ describe("goaltrees-d3", function () {
 
     });
 
+    describe("move suite", function () {
+
+        it("should clear the top of the source box", function () {
+            var b1 = new Box("B1", "blue", 0, 1, 1, 1),
+                g1 = new Box("G1", "green", 0, 0, 1, 1),
+                r1 = new Box("R1", "red", 2, 0, 1, 1),
+                o1 = new Box("O1", "orange", 3, 0, 1, 1),
+                b2 = new Box("B2", "blue", 4, 0, 1, 1);
+            var pile = new BoxPile([b1, g1, r1, o1, b2], 4, 2);
+
+            var actions = moveBox(new State(pile), g1, 1, 0);
+            expect(actions.length).toBe(2);
+
+            var action1 = actions[0];
+            expect(action1.getBox().name).toBe(b1.name);
+            expect(action1.getDstX()).toBe(2);
+            expect(action1.getDstY()).toBe(1);
+
+            var action2 = actions[1];
+            expect(action2.getBox().name).toBe(g1.name);
+            expect(action2.getDstX()).toBe(1);
+            expect(action2.getDstY()).toBe(0);
+        });
+
+    });
 });

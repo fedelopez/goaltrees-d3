@@ -15,22 +15,54 @@ const magnetHookH = 15;
 const terrainW = baseLineW;
 const terrainH = maxBoxH * 3;
 
+var State = function (boxPile) {
+    this.action = null;
 
-/**
- * todo remove srcBox, dstX and dstY as they are not really part of the state
- */
-var State = function (boxPile, srcBox, dstX, dstY) {
-
-    this.isGoal = function () {
-        function isBoxPresent(box) {
-            return box.x === dstX && box.y === dstY;
-        }
-
-        return !boxPile.hasBoxAbove(srcBox) && !boxPile.every(isBoxPresent)
+    var createNeighbor = function (pile, box, dstX) {
+        const point = pile.firstFreeCoordinate(box, dstX);
+        const pileCopy = pile.copy();
+        const boxAt = pileCopy.boxAt(box.x, box.y);
+        boxAt.x = point.x;
+        boxAt.y = point.y;
+        var state = new State(pileCopy);
+        state.action = new Action(box, point.x, point.y);
+        return state;
     };
 
-    this.getSrcBox = function () {
-        return srcBox;
+    this.getNeighbors = function (srcBox, dstX, dstY) {
+        var neighbors = [], topMostBoxSrc, topMostBoxDst, nextState = this;
+        if (boxPile.isBoxAbove(srcBox)) {
+            topMostBoxSrc = boxPile.topmostBoxAbove(srcBox);
+            nextState = createNeighbor(boxPile, topMostBoxSrc, dstX);
+            neighbors.push(nextState);
+        }
+        topMostBoxDst = nextState.getBoxPile().boxAt(dstX, dstY);
+        if (topMostBoxDst) {
+            topMostBoxDst = nextState.getBoxPile().topmostBoxAbove(topMostBoxDst) || topMostBoxDst;
+            neighbors.push(createNeighbor(nextState.getBoxPile(), topMostBoxDst, srcBox.x));
+        }
+        if (!topMostBoxSrc && !topMostBoxDst) {
+            var state = new State(boxPile);
+            state.action = new Action(srcBox, dstX, dstY);
+            neighbors.push(state)
+        }
+
+        return neighbors;
+    };
+
+    this.getBoxPile = function () {
+        return boxPile;
+    };
+
+    this.getAction = function () {
+        return this.action;
+    }
+};
+
+var Action = function (box, dstX, dstY) {
+
+    this.getBox = function () {
+        return box;
     };
 
     this.getDstX = function () {
@@ -39,44 +71,6 @@ var State = function (boxPile, srcBox, dstX, dstY) {
 
     this.getDstY = function () {
         return dstY;
-    };
-
-    /**
-     * todo pass the scr box and the destination point as parameters of this function as the state will not hold anymore
-     * this information (it will just hold a pile of boxes)
-     */
-    this.getNeighbors = function () {
-        var neighbors = [];
-        if (boxPile.isBoxAbove(srcBox)) {
-            const topMostBox = boxPile.topmostBoxAbove(srcBox);
-            const point = boxPile.firstFreeCoordinate(topMostBox, dstX);
-            neighbors.push(new Action(topMostBox.name, point.x, point.y));
-        }
-        var dstBox = boxPile.boxAt(dstX, dstY);
-        if (dstBox) {
-            const topMostBox = boxPile.topmostBoxAbove(dstBox);
-            if (topMostBox) {
-                dstBox = topMostBox;
-            }
-            const point = boxPile.firstFreeCoordinate(dstBox, dstX);
-            neighbors.push(new Action(dstBox.name, point.x, point.y));
-        }
-        return neighbors;
-    };
-};
-
-var Action = function (boxName, x, y) {
-
-    this.getBoxName = function () {
-        return boxName;
-    };
-
-    this.getDstX = function () {
-        return x;
-    };
-
-    this.getDstY = function () {
-        return y;
     };
 
 };
@@ -115,7 +109,6 @@ var BoxPile = function (allBoxes, width, height) {
         allBoxes.filter(function (box) {
             return box != srcBox && box.x === srcBox.x && box.y > srcBox.y;
         }).forEach(function (box) {
-            console.log(box.name);
             if (topMostBox === undefined || box.y > topMostBox.y) topMostBox = box;
         });
         return topMostBox;
@@ -127,7 +120,7 @@ var BoxPile = function (allBoxes, width, height) {
         });
         abscissas.sort();
         for (var x = 0; x < this.getWidth(); x++) {
-            if (abscissas.indexOf(x) < 0) {
+            if (x !== excludedAbscissa && abscissas.indexOf(x) < 0) {
                 return {"x": x, "y": 0};
             }
         }
@@ -154,7 +147,14 @@ var BoxPile = function (allBoxes, width, height) {
         });
         if (boxes.length > 0) return boxes[0];
         else return undefined;
-    }
+    };
+
+    this.copy = function () {
+        const boxes = allBoxes.map(function (box) {
+            return new Box(box.name, box.color, box.x, box.y, box.height, box.width);
+        });
+        return new BoxPile(boxes, this.getWidth(), this.getHeight());
+    };
 };
 
 const boxes = [
@@ -273,29 +273,25 @@ function dropCrane(targetBox) {
         });
 }
 
-/**
- * todo, in addition to initialState: State, pass 2 more arguments: source box: Box, destination: Point
- */
-function moveBox(initialState) {
-
-    var doMoveBox = function (visited, frontier) {
-        if (frontier.length == 0) throw "No solution";
-        else {
-            var path = frontier[0];
-            var state = path[0];
-            if (state.isGoal()) {
-                var x = state.getDstBox().x;
-                var y = 1 + state.getDstBox().y + state.getDstBox().height;
-                var boxName = state.getSrcBox().name;
-                return [new Action(boxName, x, y)];
-            } else {
-                var neighbors = [];
-                return null;
-            }
-
+function moveBox(initialState, srcBox, dstX, dstY) {
+    var actions = [];
+    var frontier = [initialState];
+    var found = false;
+    while (!found) {
+        var neighbors = frontier.shift().getNeighbors(srcBox, dstX, dstY);
+        if (neighbors === undefined || neighbors.length === 0) {
+            throw "No solution";
         }
-    };
-    return doMoveBox([], [[initialState]]);
+        frontier = frontier.concat(neighbors);
+        actions = actions.concat(neighbors.map(function (neighbor) {
+            return neighbor.getAction();
+        }));
+        var last = actions[actions.length - 1];
+        if (last.getBox().name === srcBox.name && last.getDstX() === dstX && last.getDstY() === dstY) {
+            found = true;
+        }
+    }
+    return actions;
 }
 
 

@@ -82,16 +82,6 @@ var Box = function (name, color, x, y, height, width) {
     this.y = y;
     this.height = height;
     this.width = width;
-
-    var self = this;
-
-    function onTopOf(candidateBox) {
-        return self.y < candidateBox.y && self.x === candidateBox.x
-    }
-
-    this.hasBoxAbove = function (allBoxes) {
-        return allBoxes.some(onTopOf)
-    };
 };
 
 var BoxPile = function (allBoxes, width, height) {

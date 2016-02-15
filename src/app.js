@@ -19,9 +19,9 @@ var State = function (boxPile) {
     this.step = null;
 
     var createNeighbor = function (pile, box, dstX) {
-        const point = pile.firstFreeCoordinate(box, dstX);
-        const pileCopy = pile.copy();
-        const boxAt = pileCopy.boxAt(box.x, box.y);
+        var point = pile.firstFreeCoordinate(box, dstX);
+        var pileCopy = pile.copy();
+        var boxAt = pileCopy.boxAt(box.x, box.y);
         boxAt.x = point.x;
         boxAt.y = point.y;
         var state = new State(pileCopy);
@@ -29,25 +29,23 @@ var State = function (boxPile) {
         return state;
     };
 
-    this.getNeighbors = function (srcBox, dstX, dstY) {
-        var neighbors = [], topMostBoxSrc, topMostBoxDst, nextState = this;
+    this.nextState = function (srcBox, dstX, dstY) {
+        var topMostBoxSrc, topMostBoxDst;
         if (boxPile.isBoxAbove(srcBox)) {
             topMostBoxSrc = boxPile.topmostBoxAbove(srcBox);
-            nextState = createNeighbor(boxPile, topMostBoxSrc, dstX);
-            neighbors.push(nextState);
+            return createNeighbor(boxPile, topMostBoxSrc, dstX);
         }
-        topMostBoxDst = nextState.getBoxPile().boxAt(dstX, dstY);
+        topMostBoxDst = boxPile.boxAt(dstX, dstY);
         if (topMostBoxDst) {
-            topMostBoxDst = nextState.getBoxPile().topmostBoxAbove(topMostBoxDst) || topMostBoxDst;
-            neighbors.push(createNeighbor(nextState.getBoxPile(), topMostBoxDst, srcBox.x));
+            topMostBoxDst = boxPile.topmostBoxAbove(topMostBoxDst) || topMostBoxDst;
+            return createNeighbor(boxPile, topMostBoxDst, srcBox.x);
         }
         if (!topMostBoxSrc && !topMostBoxDst) {
             var state = new State(boxPile);
             state.step = new Step(srcBox, dstX, dstY);
-            neighbors.push(state)
+            return state;
         }
-
-        return neighbors;
+        return null;
     };
 
     this.getBoxPile = function () {
@@ -72,7 +70,6 @@ var Step = function (box, dstX, dstY) {
     this.getDstY = function () {
         return dstY;
     };
-
 };
 
 var Box = function (name, color, x, y, height, width) {
@@ -114,8 +111,10 @@ var BoxPile = function (allBoxes, width, height) {
                 return {"x": x, "y": 0};
             }
         }
-        const result = allBoxes.filter(function (currentBox) {
+        var result = allBoxes.filter(function (currentBox) {
             return (!self.isBoxAbove(currentBox) && currentBox.x != box.x && currentBox.x != excludedAbscissa && currentBox.y < self.getHeight() - 1);
+        }).sort(function (a, b) {
+            return a.x - b.x;
         });
         if (result.length > 0) {
             return {"x": result[0].x, "y": result[0].y + 1};
@@ -264,24 +263,21 @@ function dropCrane(targetBox) {
 }
 
 function moveBox(initialState, srcBox, dstX, dstY) {
-    var actions = [];
-    var frontier = [initialState];
-    var found = false;
-    while (!found) {
-        var neighbors = frontier.shift().getNeighbors(srcBox, dstX, dstY);
-        if (neighbors === undefined || neighbors.length === 0) {
+    var steps = [];
+    var currentState = initialState;
+    var keepGoing = true;
+    while (keepGoing) {
+        currentState = currentState.nextState(srcBox, dstX, dstY);
+        if (!currentState) {
             throw "No solution";
         }
-        frontier = frontier.concat(neighbors);
-        actions = actions.concat(neighbors.map(function (neighbor) {
-            return neighbor.getStep();
-        }));
-        var last = actions[actions.length - 1];
-        if (last.getBox().name === srcBox.name && last.getDstX() === dstX && last.getDstY() === dstY) {
-            found = true;
+        var step = currentState.getStep();
+        steps.push(step);
+        if (step.getBox().name === srcBox.name && step.getDstX() === dstX && step.getDstY() === dstY) {
+            keepGoing = false;
         }
     }
-    return actions;
+    return steps;
 }
 
 

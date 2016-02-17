@@ -146,6 +146,56 @@ var BoxPile = function (allBoxes, width, height) {
     };
 };
 
+var MoveCommand = function () {
+
+    const template = "Move [box1] [on top of / below] [box2]";
+
+    var srcBox = {box: undefined, text: "[box1]"},
+        dstBox = {box: undefined, text: "[box2]"},
+        where = "[on top of / below]";
+
+    var isBox1 = true;
+
+    this.getText = function () {
+        isBox1 = !isBox1;
+        return template.replace("[box1]", srcBox.text).replace("[box2]", dstBox.text).replace("[on top of / below]", where);
+    };
+
+    this.setBox = function (newBox) {
+        if (isBox1) {
+            srcBox = {box: newBox, text: newBox.name};
+            dstBox = {box: undefined, text: "[box2]"};
+        } else {
+            dstBox = {box: newBox, text: newBox.name};
+        }
+
+    };
+
+    this.setWhere = function (newWhere) {
+        if (isBox1) {
+            where = "[on top of / below]";
+        } else {
+            where = newWhere;
+        }
+    };
+
+    this.canMove = function () {
+        return srcBox.box !== undefined && dstBox.box !== undefined;
+    };
+
+    this.getSrcBox = function () {
+        return srcBox.box;
+    };
+
+    this.getDstBox = function () {
+        return dstBox.box;
+    };
+
+    this.getWhere = function () {
+        return where;
+    };
+};
+
 const boxes = [
     new Box("B1", "#0000FF", 1, 1, 1, 1),
     new Box("G1", "#008000", 1, 0, 1, 1),
@@ -156,7 +206,7 @@ const boxes = [
     new Box("R2", "#FF0000", 8, 0, 1, 1),
     new Box("O2", "orange", 9, 0, 2, 1)
 ];
-
+var moveCommand = new MoveCommand();
 function runApp() {
     d3.select("#app").selectAll("*").remove();
 
@@ -223,14 +273,24 @@ function runApp() {
             return box.color;
         })
         .on("click", function (box) {
-            console.log("Box " + box.name + " clicked.");
-            dropCrane(box);
+            var boxElement = document.getElementById("box-" + box.name);
+            console.log("Box " + box.name + " clicked." + d3.mouse(this)[0] + "," + d3.mouse(this)[1]);
+
+            moveCommand.setBox(box);
+            var y = d3.mouse(this)[1];
+            var onTop = (y < (Number(boxElement.getAttribute("y")) + Number(boxElement.getAttribute("height") / 2)));
+            if (onTop) {
+                moveCommand.setWhere("on top of");
+            } else {
+                moveCommand.setWhere("below");
+            }
+            d3.select("#command").text(moveCommand.getText());
         });
 }
 
-function dropCrane(targetBox) {
+function attachCrane(targetBox, callback) {
     var boxElement = document.getElementById("box-" + targetBox.name);
-    d3.selectAll("#crane")
+    d3.select("#crane")
         .transition()
         .duration(2000)
         .ease("linear")
@@ -245,7 +305,7 @@ function dropCrane(targetBox) {
         .each("end", function () {
             console.log("Crane dropped");
         });
-    d3.selectAll("#magnet")
+    d3.select("#magnet")
         .transition()
         .duration(2000)
         .ease("linear")
@@ -259,6 +319,83 @@ function dropCrane(targetBox) {
         .attr("y", terrainH - baseLineH - (boxH * targetBox.height) - (boxH * targetBox.y) - magnetHookH)
         .each("end", function () {
             console.log("Magnet attached");
+            callback();
+        });
+}
+
+function liftCrane(targetBox, callback) {
+    console.log("About to lift " + targetBox.name);
+    d3.select("#crane")
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("height", craneH)
+        .each("end", function () {
+            console.log("Crane lifted");
+        });
+    d3.select("#magnet")
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("y", baseLineH + craneH)
+        .each("end", function () {
+            console.log("Magnet lifted");
+        });
+    d3.select("#box-" + targetBox.name)
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("y", baseLineH + craneH + magnetHookH)
+        .each("end", function () {
+            console.log("Box lifted");
+            callback();
+        });
+}
+
+function dropPayload(targetBox, dstX, dstY) {
+    d3.select("#crane")
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("x", (dstX * boxW) + ((boxW * targetBox.width) / 2) - (craneW / 2))
+        .each("end", function () {
+            console.log("Crane engaged");
+        })
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("height", terrainH - baseLineH - (boxH * dstY) - (boxH * targetBox.height) - magnetHookH)
+        .each("end", function () {
+            console.log("Crane dropped");
+        });
+
+    d3.select("#magnet")
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("x", (boxW * dstX) + (boxW * targetBox.width) / 2 - magnetHookW / 2)
+        .each("end", function () {
+            console.log("Magnet engaged");
+        })
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("y", terrainH - baseLineH - (boxH * dstY) - (boxH * targetBox.height) - magnetHookH)
+        .each("end", function () {
+            console.log("Magnet dropped");
+        });
+
+    d3.select("#box-" + targetBox.name)
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("x", boxW * dstX)
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attr("y", terrainH - baseLineH - (boxH * dstY) - (boxH * targetBox.height))
+        .each("end", function () {
+            console.log("Box dropped");
         });
 }
 
@@ -278,6 +415,20 @@ function moveBox(initialState, srcBox, dstX, dstY) {
         }
     }
     return steps;
+}
+
+function moveBoxClicked() {
+    if (moveCommand.canMove()) {
+        var dstX = moveCommand.getDstBox().x;
+        var dstY = moveCommand.getWhere().indexOf("top") ? moveCommand.getDstBox().y + 1 : moveCommand.getDstBox().y;
+        var steps = moveBox(new State(new BoxPile(boxes, terrainW, terrainH)), moveCommand.getSrcBox(), dstX, dstY);
+        console.log("steps: " + steps.length);
+        attachCrane(steps[0].getBox(), function () {
+            liftCrane(steps[0].getBox(), function () {
+                dropPayload(steps[0].getBox(), dstX, dstY);
+            })
+        });
+    }
 }
 
 

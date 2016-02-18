@@ -442,7 +442,7 @@ function moveBoxClicked() {
         var steps = moveBox(new State(terrain), moveCommand.getSrcBox(), dstX, dstY);
         console.log("Number of steps: " + steps.length);
         attachCrane(steps.slice(), dstX, dstY, function () {
-            steps.forEach(function (sRetep) {
+            steps.forEach(function (step) {
                 var box = terrain.getBoxByName(step.getBox().name);
                 box.x = step.getDstX();
                 box.y = step.getDstY();

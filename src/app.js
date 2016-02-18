@@ -138,6 +138,14 @@ var BoxPile = function (allBoxes, width, height) {
         else return undefined;
     };
 
+    this.getBoxByName = function (boxName) {
+        var boxes = allBoxes.filter(function (box) {
+            return (box.name === boxName);
+        });
+        if (boxes.length > 0) return boxes[0];
+        else return undefined;
+    };
+
     this.copy = function () {
         const boxes = allBoxes.map(function (box) {
             return new Box(box.name, box.color, box.x, box.y, box.height, box.width);
@@ -206,6 +214,7 @@ const boxes = [
     new Box("R2", "#FF0000", 8, 0, 1, 1),
     new Box("O2", "orange", 9, 0, 2, 1)
 ];
+const terrain = new BoxPile(boxes, terrainW, terrainH);
 var moveCommand = new MoveCommand();
 function runApp() {
     d3.select("#app").selectAll("*").remove();
@@ -288,7 +297,8 @@ function runApp() {
         });
 }
 
-function attachCrane(targetBox, callback) {
+function attachCrane(steps, dstX, dstY, callback) {
+    var targetBox = steps[0].getBox();
     var boxElement = document.getElementById("box-" + targetBox.name);
     d3.select("#crane")
         .transition()
@@ -319,11 +329,12 @@ function attachCrane(targetBox, callback) {
         .attr("y", terrainH - baseLineH - (boxH * targetBox.height) - (boxH * targetBox.y) - magnetHookH)
         .each("end", function () {
             console.log("Magnet attached");
-            callback();
+            liftCrane(steps, dstX, dstY, callback);
         });
 }
 
-function liftCrane(targetBox, callback) {
+function liftCrane(steps, dstX, dstY, callback) {
+    var targetBox = steps[0].getBox();
     console.log("About to lift " + targetBox.name);
     d3.select("#crane")
         .transition()
@@ -348,23 +359,24 @@ function liftCrane(targetBox, callback) {
         .attr("y", baseLineH + craneH + magnetHookH)
         .each("end", function () {
             console.log("Box lifted");
-            callback();
+            dropPayload(steps, dstX, dstY, callback);
         });
 }
 
-function dropPayload(targetBox, dstX, dstY) {
+function dropPayload(steps, dstX, dstY, callback) {
+    var targetBox = steps[0].getBox();
     d3.select("#crane")
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("x", (dstX * boxW) + ((boxW * targetBox.width) / 2) - (craneW / 2))
+        .attr("x", (steps[0].getDstX() * boxW) + ((boxW * targetBox.width) / 2) - (craneW / 2))
         .each("end", function () {
             console.log("Crane engaged");
         })
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("height", terrainH - baseLineH - (boxH * dstY) - (boxH * targetBox.height) - magnetHookH)
+        .attr("height", terrainH - baseLineH - (boxH * steps[0].getDstY()) - (boxH * targetBox.height) - magnetHookH)
         .each("end", function () {
             console.log("Crane dropped");
         });
@@ -373,14 +385,14 @@ function dropPayload(targetBox, dstX, dstY) {
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("x", (boxW * dstX) + (boxW * targetBox.width) / 2 - magnetHookW / 2)
+        .attr("x", (boxW * steps[0].getDstX()) + (boxW * targetBox.width) / 2 - magnetHookW / 2)
         .each("end", function () {
             console.log("Magnet engaged");
         })
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("y", terrainH - baseLineH - (boxH * dstY) - (boxH * targetBox.height) - magnetHookH)
+        .attr("y", terrainH - baseLineH - (boxH * steps[0].getDstY()) - (boxH * targetBox.height) - magnetHookH)
         .each("end", function () {
             console.log("Magnet dropped");
         });
@@ -389,13 +401,19 @@ function dropPayload(targetBox, dstX, dstY) {
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("x", boxW * dstX)
+        .attr("x", boxW * steps[0].getDstX())
         .transition()
         .duration(2000)
         .ease("linear")
-        .attr("y", terrainH - baseLineH - (boxH * dstY) - (boxH * targetBox.height))
+        .attr("y", terrainH - baseLineH - (boxH * steps[0].getDstY()) - (boxH * targetBox.height))
         .each("end", function () {
             console.log("Box dropped");
+            steps.shift();
+            if (steps.length > 0) {
+                attachCrane(steps, dstX, dstY, callback);
+            } else {
+                callback();
+            }
         });
 }
 
@@ -420,13 +438,16 @@ function moveBox(initialState, srcBox, dstX, dstY) {
 function moveBoxClicked() {
     if (moveCommand.canMove()) {
         var dstX = moveCommand.getDstBox().x;
-        var dstY = moveCommand.getWhere().indexOf("top") ? moveCommand.getDstBox().y + 1 : moveCommand.getDstBox().y;
-        var steps = moveBox(new State(new BoxPile(boxes, terrainW, terrainH)), moveCommand.getSrcBox(), dstX, dstY);
-        console.log("steps: " + steps.length);
-        attachCrane(steps[0].getBox(), function () {
-            liftCrane(steps[0].getBox(), function () {
-                dropPayload(steps[0].getBox(), dstX, dstY);
-            })
+        var dstY = moveCommand.getDstBox().height * (moveCommand.getWhere().indexOf("top") ? moveCommand.getDstBox().y + 1 : moveCommand.getDstBox().y);
+        var steps = moveBox(new State(terrain), moveCommand.getSrcBox(), dstX, dstY);
+        console.log("Number of steps: " + steps.length);
+        attachCrane(steps.slice(), dstX, dstY, function () {
+            console.log("Callback!");
+            steps.forEach(function (step) {
+                var box = terrain.getBoxByName(step.getBox().name);
+                box.x = step.getDstX();
+                box.y = step.getDstY();
+            });
         });
     }
 }

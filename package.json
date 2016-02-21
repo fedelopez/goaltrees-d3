@@ -2,14 +2,18 @@
   "name": "goaltrees-d3",
   "version": "0.0.1",
   "dependencies": {
+    "amdefine": "^1.0.0",
     "d3": "^3.5.13",
-    "express": "^4.13.4"
+    "express": "^4.13.4",
+    "requirejs": "^2.1.22"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "jasmine-core": "^2.4.1",
     "karma": "^0.13.19",
     "karma-jasmine": "^0.3.7",
     "karma-phantomjs-launcher": "^1.0.0",
+    "mocha": "^2.4.5",
     "phantomjs-prebuilt": "^2.1.3"
   },
   "engines": {

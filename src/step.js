@@ -4,24 +4,22 @@ if (typeof define !== 'function') {
 
 define(function () {
 
-    var _box, _dstX, _dstY;
-
     function Step(box, dstX, dstY) {
-        _box = box;
-        _dstX = dstX;
-        _dstY = dstY;
+        this._box = box;
+        this._dstX = dstX;
+        this._dstY = dstY;
     }
 
     Step.prototype.getBox = function () {
-        return _box;
+        return this._box;
     };
 
     Step.prototype.getDstX = function () {
-        return _dstX;
+        return this._dstX;
     };
 
     Step.prototype.getDstY = function () {
-        return _dstY;
+        return this._dstY;
     };
 
     return Step;

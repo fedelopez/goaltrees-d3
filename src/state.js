@@ -2,7 +2,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module)
 }
 
-define(function () {
+define(['require', './step'], function (require) {
 
     var Step = require('./step');
 

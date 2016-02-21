@@ -2,8 +2,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module)
 }
 
-define(function (require) {
-
+require(["box", "box_pile", "move_command", "state", "./lib/d3"], function (Box, BoxPile, MoveCommand, State, d3) {
     const boxW = 50;
     const boxH = 50;
     const maxBoxH = boxH * 2;
@@ -21,11 +20,6 @@ define(function (require) {
     const terrainW = baseLineW;
     const terrainH = maxBoxH * 3;
 
-    var Box = require("./box");
-    var BoxPile = require("./box_pile");
-    var MoveCommand = require("./move_command");
-    var d3 = require("lib/d3");
-
     const boxes = [
         new Box("B1", "#0000FF", 1, 1, 1, 1),
         new Box("G1", "#008000", 1, 0, 1, 1),
@@ -36,6 +30,7 @@ define(function (require) {
         new Box("R2", "#FF0000", 8, 0, 1, 1),
         new Box("O2", "orange", 9, 0, 2, 1)
     ];
+
     const terrain = new BoxPile(boxes, terrainW, terrainH);
     var moveCommand = new MoveCommand();
 

@@ -7,34 +7,24 @@ define(function () {
     var Step = require('./step');
 
     function State(boxPile) {
-        this.step = null;
         this._boxPile = boxPile;
+        this.step = null;
     }
-
-    var createNeighbor = function (pile, box, dstX) {
-        var point = pile.firstFreeCoordinate(box, dstX);
-        var pileCopy = pile.copy();
-        var boxAt = pileCopy.boxAt(box.x, box.y);
-        boxAt.x = point.x;
-        boxAt.y = point.y;
-        var state = new State(pileCopy);
-        state.step = new Step(box, point.x, point.y);
-        return state;
-    };
 
     State.prototype.nextState = function (srcBox, dstX, dstY) {
         var topMostBoxSrc, topMostBoxDst;
-        if (this._boxPile.isBoxAbove(srcBox)) {
-            topMostBoxSrc = this._boxPile.topmostBoxAbove(srcBox);
-            return createNeighbor(this._boxPile, topMostBoxSrc, dstX);
+        var boxPile = this.getBoxPile();
+        if (boxPile.isBoxAbove(srcBox)) {
+            topMostBoxSrc = boxPile.topmostBoxAbove(srcBox);
+            return createNeighbor(boxPile, topMostBoxSrc, dstX);
         }
-        topMostBoxDst = this._boxPile.boxAt(dstX, dstY);
+        topMostBoxDst = boxPile.boxAt(dstX, dstY);
         if (topMostBoxDst) {
-            topMostBoxDst = this._boxPile.topmostBoxAbove(topMostBoxDst) || topMostBoxDst;
-            return createNeighbor(this._boxPile, topMostBoxDst, srcBox.x);
+            topMostBoxDst = boxPile.topmostBoxAbove(topMostBoxDst) || topMostBoxDst;
+            return createNeighbor(boxPile, topMostBoxDst, srcBox.x);
         }
         if (!topMostBoxSrc && !topMostBoxDst) {
-            var state = new State(this._boxPile);
+            var state = new State(boxPile);
             state.step = new Step(srcBox, dstX, dstY);
             return state;
         }
@@ -48,6 +38,17 @@ define(function () {
     State.prototype.getStep = function () {
         return this.step;
     };
+
+    function createNeighbor(pile, box, dstX) {
+        var point = pile.firstFreeCoordinate(box, dstX);
+        var pileCopy = pile.copy();
+        var boxAt = pileCopy.boxAt(box.x, box.y);
+        boxAt.x = point.x;
+        boxAt.y = point.y;
+        var state = new State(pileCopy);
+        state.step = new Step(box, point.x, point.y);
+        return state;
+    }
 
     return State;
 

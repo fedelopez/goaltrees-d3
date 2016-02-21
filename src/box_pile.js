@@ -7,7 +7,6 @@ define(function () {
     var Box = require('./box');
 
     function BoxPile(boxes, width, height) {
-        self = this;
         this._boxes = boxes;
         this._width = width;
         this._height = height;
@@ -40,6 +39,7 @@ define(function () {
                 return {"x": x, "y": 0};
             }
         }
+        var self = this;
         var result = this._boxes.filter(function (currentBox) {
             return (!self.isBoxAbove(currentBox) && currentBox.x != box.x && currentBox.x != excludedAbscissa && currentBox.y < self.getHeight() - 1);
         }).sort(function (a, b) {

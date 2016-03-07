@@ -3,22 +3,22 @@ if (typeof define !== 'function') {
 }
 
 require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, MoveCommand, State, d3) {
-    const boxW = 50;
-    const boxH = 50;
+    const boxW = 80;
+    const boxH = 80;
     const maxBoxH = boxH * 2;
 
     const xLimit = 10;
     const baseLineW = boxW * xLimit;
-    const baseLineH = 10;
+    const baseLineH = 15;
 
-    const craneW = 10;
-    const craneH = 40;
+    const craneW = 20;
+    const craneH = 80;
 
-    const magnetHookW = 30;
+    const magnetHookW = 50;
     const magnetHookH = 15;
 
     const terrainW = baseLineW;
-    const terrainH = maxBoxH * 3;
+    const terrainH = maxBoxH * 4;
 
     var terrain = BoxPile.createTerrain(terrainW, terrainH);
     var moveCommand = new MoveCommand();
@@ -28,6 +28,7 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
 
         var container = d3.select("#app")
             .append("svg")
+            .attr("style", "display: block;margin: auto")
             .attr("width", terrainW)
             .attr("height", terrainH);
 
@@ -37,7 +38,7 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
             .attr("y", terrainH - baseLineH)
             .attr("width", baseLineW)
             .attr("height", baseLineH)
-            .style("fill", "lightgrey");
+            .style("fill", "Sienna");
 
         //CRANE
         container.append("rect")
@@ -45,21 +46,21 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
             .attr("y", 0)
             .attr("width", baseLineW)
             .attr("height", baseLineH)
-            .style("fill", "black");
+            .style("fill", "DarkSlateGray");
         container.append("rect")
             .attr("id", "crane")
             .attr("x", (terrainW / 2) - craneW / 2)
             .attr("y", baseLineH)
             .attr("width", craneW)
             .attr("height", craneH)
-            .style("fill", "black");
+            .style("fill", "DarkSlateGray");
         container.append("rect")
             .attr("id", "magnet")
             .attr("x", (terrainW / 2) - magnetHookW / 2)
             .attr("y", baseLineH + craneH)
             .attr("width", magnetHookW)
             .attr("height", magnetHookH)
-            .style("fill", "black");
+            .style("fill", "DarkSlateGray");
 
         //BOXES
         container.selectAll("[id^=box]")
@@ -217,8 +218,28 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
                 console.log("Box dropped");
                 steps.shift();
                 if (steps.length > 0) {
-                    attachCrane(steps, dstX, dstY, callback);
+                    resetCrane(function () {
+                        attachCrane(steps, dstX, dstY, callback);
+                    })
                 } else {
+                    callback();
+                }
+            });
+    }
+
+    function resetCrane(callback) {
+        d3.select("#crane")
+            .transition()
+            .duration(2000)
+            .ease("linear")
+            .attr("height", craneH);
+        d3.select("#magnet")
+            .transition()
+            .duration(2000)
+            .ease("linear")
+            .attr("y", baseLineH + craneH)
+            .each("end", function () {
+                if (callback) {
                     callback();
                 }
             });
@@ -235,17 +256,7 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
                     var box = terrain.getBoxByName(step.getBox().name);
                     box.x = step.getDstX();
                     box.y = step.getDstY();
-
-                    d3.select("#crane")
-                        .transition()
-                        .duration(2000)
-                        .ease("linear")
-                        .attr("height", craneH);
-                    d3.select("#magnet")
-                        .transition()
-                        .duration(2000)
-                        .ease("linear")
-                        .attr("y", baseLineH + craneH);
+                    resetCrane();
                 });
             });
         }

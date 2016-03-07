@@ -13,18 +13,6 @@ define(function () {
         this.width = width;
     }
 
-    Box.prototype.getName = function () {
-        return this.name;
-    };
-    Box.prototype.getColor = function () {
-        return this.color;
-    };
-    Box.prototype.getX = function () {
-        return this.x;
-    };
-    Box.prototype.getY = function () {
-        return this.y;
-    };
     Box.prototype.getHeight = function () {
         return this.height;
     };

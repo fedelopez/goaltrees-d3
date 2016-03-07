@@ -2,7 +2,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module)
 }
 
-require(["box", "box_pile", "move_command", "state", "./lib/d3"], function (Box, BoxPile, MoveCommand, State, d3) {
+require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, MoveCommand, State, d3) {
     const boxW = 50;
     const boxH = 50;
     const maxBoxH = boxH * 2;
@@ -20,18 +20,7 @@ require(["box", "box_pile", "move_command", "state", "./lib/d3"], function (Box,
     const terrainW = baseLineW;
     const terrainH = maxBoxH * 3;
 
-    const boxes = [
-        new Box("B1", "#0000FF", 1, 1, 1, 1),
-        new Box("G1", "#008000", 1, 0, 1, 1),
-        new Box("R1", "#FF0000", 2, 0, 2, 1),
-        new Box("O1", "orange", 3, 0, 1, 1),
-        new Box("B2", "#0000FF", 4, 0, 2, 2),
-        new Box("G2", "#008000", 6, 0, 1, 2),
-        new Box("R2", "#FF0000", 8, 0, 1, 1),
-        new Box("O2", "orange", 9, 0, 2, 1)
-    ];
-
-    const terrain = new BoxPile(boxes, terrainW, terrainH);
+    var terrain = BoxPile.createTerrain(terrainW, terrainH);
     var moveCommand = new MoveCommand();
 
     function runApp() {
@@ -74,7 +63,7 @@ require(["box", "box_pile", "move_command", "state", "./lib/d3"], function (Box,
 
         //BOXES
         container.selectAll("[id^=box]")
-            .data(boxes)
+            .data(terrain.getBoxes())
             .enter()
             .append("rect")
             .attr("id", function (box) {
@@ -246,6 +235,17 @@ require(["box", "box_pile", "move_command", "state", "./lib/d3"], function (Box,
                     var box = terrain.getBoxByName(step.getBox().name);
                     box.x = step.getDstX();
                     box.y = step.getDstY();
+
+                    d3.select("#crane")
+                        .transition()
+                        .duration(2000)
+                        .ease("linear")
+                        .attr("height", craneH);
+                    d3.select("#magnet")
+                        .transition()
+                        .duration(2000)
+                        .ease("linear")
+                        .attr("y", baseLineH + craneH);
                 });
             });
         }

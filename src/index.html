@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Magnetic Crane</title>
+    <link rel="stylesheet" type="text/css" href="css/app.css">
 </head>
 <body>
-<div style="width: 50%;margin: 0 auto;">
-    <h2>Magnetic Crane</h2>
-    <div id="app" style="background-color: AliceBlue"></div>
-    <h4 id="command">Move [box1] [on top of / below] [box2]</h4>
+<div class="parent">
+    <h2 style="color: DarkBlue">Magnetic Crane</h2>
+    <div id="app"></div>
+    <p id="command">Move [box1] [on top of/below] [box2]</p>
     <button id="moveBtn">Move</button>
-    <button id="resetBtn">Reset</button>
 </div>
 <script data-main="./app" src="lib/require.js"></script>
 </body>

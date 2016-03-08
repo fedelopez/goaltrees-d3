@@ -263,10 +263,6 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
         }
     }
 
-    var resetButton = document.getElementById("resetBtn");
-    resetButton.onclick = function () {
-        runApp();
-    };
     var moveButton = document.getElementById("moveBtn");
     moveButton.onclick = function () {
         moveBoxClicked();

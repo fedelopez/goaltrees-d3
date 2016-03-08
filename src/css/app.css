@@ -1,0 +1,37 @@
+@font-face {
+    font-family: "C64 Pro Mono/Style";
+    src: url(C64_Pro_Mono-STYLE.ttf) format("truetype");
+}
+
+body, button {
+    font-family: "C64 Pro Mono/Style", serif;
+    background-color: AliceBlue;
+}
+
+.parent {
+    width: 50%;
+    margin: 0 auto;
+}
+
+#app {
+    border: 1px solid lightgrey;
+}
+
+#moveBtn {
+    background-color: white;
+    color: black;
+    border: 2px solid #e7e7e7;
+    padding: 16px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+#moveBtn:hover {
+    background-color: #e7e7e7;
+}

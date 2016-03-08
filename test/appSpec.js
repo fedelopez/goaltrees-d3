@@ -138,6 +138,22 @@ describe("goaltrees-d3", function () {
             expect(boxPile.topmostBoxAbove(allBoxes[1])).to.equal(allBoxes[0]);
         });
 
+        it("should intersect with box at (1,0)", function () {
+            expect(boxPile.intersectsBoxAt(1, 0)).to.be.true;
+        });
+
+        it("should intersect with box at (1,1)", function () {
+            expect(boxPile.intersectsBoxAt(1, 1)).to.be.true;
+        });
+
+        it("should intersect with box at (7,0)", function () {
+            expect(boxPile.intersectsBoxAt(7, 0)).to.be.true;
+        });
+
+        it("should not intersect with box at (2,2)", function () {
+            expect(boxPile.intersectsBoxAt(2, 2)).to.be.false;
+        });
+
     });
 
     describe("move suite", function () {

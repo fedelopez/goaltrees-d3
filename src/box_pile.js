@@ -35,7 +35,7 @@ define(['require', './box'], function (require) {
         });
         abscissas.sort();
         for (var x = 0; x < this.getWidth(); x++) {
-            if (x !== excludedAbscissa && abscissas.indexOf(x) < 0) {
+            if (x !== excludedAbscissa && abscissas.indexOf(x) < 0 && !this.intersectsBoxAt(x, 0)) {
                 return {"x": x, "y": 0};
             }
         }
@@ -69,6 +69,14 @@ define(['require', './box'], function (require) {
         });
         if (boxes.length > 0) return boxes[0];
         else return undefined;
+    };
+
+    BoxPile.prototype.intersectsBoxAt = function (x, y) {
+        var boxes = this._boxes.filter(function (box) {
+            console.log(JSON.stringify(box));
+            return (box.x <= x && (box.x + box.width) > x) && (box.y <= y && (box.y + box.height > y));
+        });
+        return boxes.length > 0;
     };
 
     BoxPile.prototype.getBoxByName = function (boxName) {

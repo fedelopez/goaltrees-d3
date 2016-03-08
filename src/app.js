@@ -3,6 +3,8 @@ if (typeof define !== 'function') {
 }
 
 require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, MoveCommand, State, d3) {
+    const timeout = 1500;
+
     const boxW = 80;
     const boxH = 80;
     const maxBoxH = boxH * 2;
@@ -110,14 +112,14 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
         var boxElement = document.getElementById("box-" + targetBox.name);
         d3.select("#crane")
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("x", Number(boxElement.getAttribute("x")) + (boxW * targetBox.width) / 2 - craneW / 2)
             .each("end", function () {
                 console.log("Crane engaged");
             })
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("height", terrainH - baseLineH - (boxH * targetBox.height) - (boxH * targetBox.y) - magnetHookH)
             .each("end", function () {
@@ -125,14 +127,14 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
             });
         d3.select("#magnet")
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("x", Number(boxElement.getAttribute("x")) + (boxW * targetBox.width) / 2 - magnetHookW / 2)
             .each("end", function () {
                 console.log("Magnet engaged");
             })
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("y", terrainH - baseLineH - (boxH * targetBox.height) - (boxH * targetBox.y) - magnetHookH)
             .each("end", function () {
@@ -146,7 +148,7 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
         console.log("About to lift " + targetBox.name);
         d3.select("#crane")
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("height", craneH)
             .each("end", function () {
@@ -154,7 +156,7 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
             });
         d3.select("#magnet")
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("y", baseLineH + craneH)
             .each("end", function () {
@@ -162,7 +164,7 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
             });
         d3.select("#box-" + targetBox.name)
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("y", baseLineH + craneH + magnetHookH)
             .each("end", function () {
@@ -175,14 +177,14 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
         var targetBox = steps[0].getBox();
         d3.select("#crane")
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("x", (steps[0].getDstX() * boxW) + ((boxW * targetBox.width) / 2) - (craneW / 2))
             .each("end", function () {
                 console.log("Crane engaged");
             })
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("height", terrainH - baseLineH - (boxH * steps[0].getDstY()) - (boxH * targetBox.height) - magnetHookH)
             .each("end", function () {
@@ -191,14 +193,14 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
 
         d3.select("#magnet")
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("x", (boxW * steps[0].getDstX()) + (boxW * targetBox.width) / 2 - magnetHookW / 2)
             .each("end", function () {
                 console.log("Magnet engaged");
             })
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("y", terrainH - baseLineH - (boxH * steps[0].getDstY()) - (boxH * targetBox.height) - magnetHookH)
             .each("end", function () {
@@ -207,35 +209,35 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
 
         d3.select("#box-" + targetBox.name)
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("x", boxW * steps[0].getDstX())
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("y", terrainH - baseLineH - (boxH * steps[0].getDstY()) - (boxH * targetBox.height))
             .each("end", function () {
                 console.log("Box dropped");
                 steps.shift();
-                if (steps.length > 0) {
-                    resetCrane(function () {
+                resetCrane(function () {
+                    if (steps.length > 0) {
                         attachCrane(steps, dstX, dstY, callback);
-                    })
-                } else {
-                    callback();
-                }
+                    } else {
+                        callback();
+                    }
+                });
             });
     }
 
     function resetCrane(callback) {
         d3.select("#crane")
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("height", craneH);
         d3.select("#magnet")
             .transition()
-            .duration(2000)
+            .duration(timeout)
             .ease("linear")
             .attr("y", baseLineH + craneH)
             .each("end", function () {
@@ -256,7 +258,6 @@ require(["box_pile", "move_command", "state", "./lib/d3"], function (BoxPile, Mo
                     var box = terrain.getBoxByName(step.getBox().name);
                     box.x = step.getDstX();
                     box.y = step.getDstY();
-                    resetCrane();
                 });
             });
         }

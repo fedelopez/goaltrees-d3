@@ -169,10 +169,6 @@ describe("goaltrees-d3", function () {
             var steps = BoxPile.moveBox(new State(pile), g1, 1, 0);
             expect(steps.length).to.equal(2);
 
-            steps.forEach(function (step) {
-                console.log(step.getBox());
-            });
-
             var step1 = steps[0];
             expect(step1.getBox().name).to.equal(b1.name);
             expect(step1.getDstX()).to.equal(2);
